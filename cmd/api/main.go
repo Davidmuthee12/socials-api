@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/Davidmuthee12/socials/internal/db"
 	"github.com/Davidmuthee12/socials/internal/env"
 	"github.com/Davidmuthee12/socials/internal/store"
 )
@@ -10,9 +11,29 @@ import (
 func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":8000"),
+		db: dbConfig {
+			addr: env.GetString("DB_ADDR", "postgres://user:adminpassword@localhost/social?sslmode=disable"),
+			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),
+			maxIddleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
+			maxIddleTime: env.GetString("DB_MAX_IDLE_TIME", "15m"),
+		},
 	}
 
-	store := store.NewStorage(nil)
+	db, err := db.New(
+		cfg.db.addr,
+		cfg.db.maxOpenConns,
+		cfg.db.maxIddleConns,
+		cfg.db.maxIddleTime,
+	)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer db.Close()
+	log.Println("Database connection pool established")
+
+	store := store.NewStorage(db)
 
 	app := &application{
 		config: cfg,
