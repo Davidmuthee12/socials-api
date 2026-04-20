@@ -8,6 +8,8 @@ import (
 	"github.com/Davidmuthee12/socials/internal/store"
 )
 
+const version = "1.0.0"
+
 func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":8000"),
@@ -17,6 +19,7 @@ func main() {
 			maxIddleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
 			maxIddleTime: env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
+		env: env.GetString("ENV", "development"),
 	}
 
 	db, err := db.New(
