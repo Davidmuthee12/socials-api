@@ -4,6 +4,7 @@ MIGRATE ?= migrate
 MIGRATIONS_PATH ?= ./cmd/migrate/migrations
 MIGRATIONS_SOURCE ?= file://$(MIGRATIONS_PATH)
 APP_BIN ?= ./bin/main
+export DB_ADDR
 
 .PHONY: help api build run test tidy docker-up docker-down migration-create migration-up migration-down migration-down-all migration-force migration-version migration-goto migration-drop
 
@@ -28,6 +29,9 @@ help:
 api:
 	go run ./cmd/api
 
+seed:
+	go run ./cmd/migrate/seed/main.go
+	
 build:
 	go build -o $(APP_BIN) ./cmd/api
 
@@ -72,3 +76,4 @@ migration-goto:
 
 migration-drop:
 	$(MIGRATE) -source $(MIGRATIONS_SOURCE) -database "$(DB_ADDR)" drop
+ 
