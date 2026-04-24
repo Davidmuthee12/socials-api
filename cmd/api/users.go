@@ -10,13 +10,13 @@ import (
 )
 
 type userKey string
-const userCtx userKey = "user"
 
+const userCtx userKey = "user"
 
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromCtx(r)
 
-	if err := app.jsonResponse(w, http.StatusOK, user); err != nil{
+	if err := app.jsonResponse(w, http.StatusOK, user); err != nil {
 		app.internalServerError(w, r, err)
 
 	}
@@ -46,10 +46,10 @@ func (app *application) getFollowHandler(w http.ResponseWriter, r *http.Request)
 			app.internalServerError(w, r, err)
 			return
 		}
-		
+
 	}
 
-	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil{
+	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
 		app.internalServerError(w, r, err)
 
 	}
@@ -71,19 +71,18 @@ func (app *application) getUnfollowHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil{
+	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
 		app.internalServerError(w, r, err)
 
 	}
 }
 
-
 func (app *application) userContextMiddleware(next http.Handler) http.Handler {
-	return  http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
-		if err!= nil {
+		if err != nil {
 			app.badRequestResponse(w, r, err)
-			return 
+			return
 		}
 
 		ctx := r.Context()

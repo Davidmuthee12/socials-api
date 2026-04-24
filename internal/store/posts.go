@@ -9,16 +9,16 @@ import (
 )
 
 type Post struct {
-	ID int64 `json:"id"`
-	Title string `json:"title"`
-	Content string `json:"content"`
-	UserID int64 `json:"user_id"`
-	Tags []string `json:"tags"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Version int `json:"version"`
-	Comments []Comment `json:"comments"`
-	User User `json:"user"`
+	ID        int64     `json:"id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	UserID    int64     `json:"user_id"`
+	Tags      []string  `json:"tags"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
+	Version   int       `json:"version"`
+	Comments  []Comment `json:"comments"`
+	User      User      `json:"user"`
 }
 
 type PostWithMetadata struct {
@@ -44,7 +44,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedF
 		 (p.title ILIKE '%' || $4 || '%' OR p.content ILIKE '%' || $4 || '%') AND 
 		 (p.tags @> $5 OR $5 = '{}') 
 		GROUP BY p.id, u.username
-		ORDER BY p.created_at `+ fq.Sort +`
+		ORDER BY p.created_at ` + fq.Sort + `
 		LIMIT $2 OFFSET $3
 	`
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
@@ -76,7 +76,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedF
 		}
 
 		feed = append(feed, p)
-	}	
+	}
 
 	return feed, nil
 
@@ -86,7 +86,7 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	query := `
 		INSERT INTO posts(content, title, user_id, tags)
 		VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at
-	`  
+	`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
@@ -108,7 +108,7 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	}
 
 	return nil
-	
+
 }
 
 func (s *PostStore) GetByID(ctx context.Context, id int64) (*Post, error) {
@@ -147,10 +147,10 @@ func (s *PostStore) GetByID(ctx context.Context, id int64) (*Post, error) {
 		}
 	}
 
-	return  &post, nil 
+	return &post, nil
 }
 
-func (s *PostStore) DeletePost(ctx context.Context, postID int64) (error) {
+func (s *PostStore) DeletePost(ctx context.Context, postID int64) error {
 	query := `
 		DELETE FROM posts where id = $1
 	`
@@ -185,12 +185,12 @@ func (s *PostStore) UpdatePost(ctx context.Context, post *Post) error {
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
 	defer cancel()
 
-	 err := s.db.QueryRowContext(
+	err := s.db.QueryRowContext(
 		ctx,
 		query,
 		post.Title,
 		post.Content,
-		post.ID, 
+		post.ID,
 		post.Version,
 	).Scan(
 		&post.Version,
@@ -198,7 +198,7 @@ func (s *PostStore) UpdatePost(ctx context.Context, post *Post) error {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-				return ErrNotFound
+			return ErrNotFound
 		default:
 			return err
 		}

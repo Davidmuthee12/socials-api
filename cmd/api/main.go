@@ -10,14 +10,34 @@ import (
 
 const version = "1.0.0"
 
+//	@title	Socials APP API
+
+//	@description	This API for the social app.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@BasePath	/v1
+
+//	@securityDefinations.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description
+
 func main() {
 	cfg := config{
-		addr: env.GetString("ADDR", ":8000"),
-		db: dbConfig {
-			addr: env.GetString("DB_ADDR", "postgres://user:adminpassword@localhost/social?sslmode=disable"),
-			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),
+		addr:   env.GetString("ADDR", ":8000"),
+		apiURL: env.GetString("EXTERNAL_URL", "localhost:8000"),
+		db: dbConfig{
+			addr:          env.GetString("DB_ADDR", "postgres://user:adminpassword@localhost/social?sslmode=disable"),
+			maxOpenConns:  env.GetInt("DB_MAX_OPEN_CONNS", 25),
 			maxIddleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
-			maxIddleTime: env.GetString("DB_MAX_IDLE_TIME", "15m"),
+			maxIddleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
 		env: env.GetString("ENV", "development"),
 	}
@@ -40,10 +60,9 @@ func main() {
 
 	app := &application{
 		config: cfg,
-		store: store,
+		store:  store,
 	}
 
-	
 	mux := app.mount()
 	log.Fatal(app.run(mux))
 }

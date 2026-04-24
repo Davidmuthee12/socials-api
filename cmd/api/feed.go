@@ -8,9 +8,9 @@ import (
 
 func (app *application) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	fq := store.PaginatedFeedQuery{
-		Limit: 20,
+		Limit:  20,
 		Offset: 0,
-		Sort: "desc",
+		Sort:   "desc",
 	}
 
 	fq, err := fq.Parse(r)
