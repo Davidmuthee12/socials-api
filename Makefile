@@ -51,7 +51,7 @@ docker-down:
 	docker compose down
 
 gen-docs:
-	@swag init -g ./api/main.go -d cmd,internal && swag fmt
+	@swag init -g main.go -d cmd/api,internal && swag fmt
 
 migration-create:
 	$(if $(strip $(name)),,$(error name is required: make migration-create name=create_users))
