@@ -22,9 +22,9 @@ const version = "1.0.0"
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@BasePath	/v1
-
-//	@securityDefinations.apikey	ApiKeyAuth
+//	@BasePath					/v1
+//
+//	@securityDefinitions.apikey	ApiKeyAuth
 //	@in							header
 //	@name						Authorization
 //	@description
@@ -32,7 +32,7 @@ const version = "1.0.0"
 func main() {
 	cfg := config{
 		addr:   env.GetString("ADDR", ":8000"),
-		apiURL: env.GetString("EXTERNAL_URL", "localhost:8000"),
+		apiURL: env.GetString("EXTERNAL_URL", "localhost:8080"),
 		db: dbConfig{
 			addr:          env.GetString("DB_ADDR", "postgres://user:adminpassword@localhost/social?sslmode=disable"),
 			maxOpenConns:  env.GetInt("DB_MAX_OPEN_CONNS", 25),
