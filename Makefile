@@ -50,6 +50,9 @@ docker-up:
 docker-down:
 	docker compose down
 
+gen-docs:
+	@swag init -g ./api/main.go -d cmd,internal && swag fmt
+
 migration-create:
 	$(if $(strip $(name)),,$(error name is required: make migration-create name=create_users))
 	$(MIGRATE) create -seq -ext sql -dir $(MIGRATIONS_PATH) $(name)
