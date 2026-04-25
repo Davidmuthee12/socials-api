@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -10,11 +9,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
+	"go.uber.org/zap"
 )
 
 type application struct {
 	config config
 	store  store.Storage
+	logger *zap.SugaredLogger
 }
 
 type config struct {
@@ -96,7 +97,7 @@ func (app *application) run(mux http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("Server is listening on %s", app.config.addr)
+	app.logger.Infow("Server has started", "addr", app.config.addr, "env", app.config.env)
 
 	return srv.ListenAndServe()
 }
