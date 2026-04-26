@@ -23,7 +23,7 @@ type config struct {
 	db     dbConfig
 	env    string
 	apiURL string
-	mail mailConfig
+	mail   mailConfig
 }
 
 type mailConfig struct {
@@ -81,12 +81,12 @@ func (app *application) mount() http.Handler {
 			r.Group(func(r chi.Router) {
 				r.Get("/feed", app.getUserFeedHandler)
 			})
-
-			r.Route("/authentication", func(r chi.Router) {
-				r.Post("/users", app.registerUserHandler)
-			})
-
 		})
+
+		r.Route("/authentication", func(r chi.Router) {
+			r.Post("/users", app.registerUserHandler)
+		})
+
 	})
 
 	return r
