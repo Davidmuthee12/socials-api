@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/Davidmuthee12/socials/internal/db"
 	"github.com/Davidmuthee12/socials/internal/env"
 	"github.com/Davidmuthee12/socials/internal/store"
@@ -39,6 +41,9 @@ func main() {
 			maxIddleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
 		env: env.GetString("ENV", "development"),
+		mail: mailConfig{
+			exp: time.Hour * 24 *3, // user has 3 days to accept invitation
+		},
 	}
 
 	// Logger
