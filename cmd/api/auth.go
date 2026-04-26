@@ -26,10 +26,10 @@ type RegisterUserPayload struct {
 //	@Success		201		{object}	store.User			"User registered"
 //	@Failure		400		{object}	error
 //	@Failure		500		{object}	error
-//	@Router			/authentication/user [post]
+//	@Router			/authentication/users [post]
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload RegisterUserPayload
-	if err := readJSON(w, r, payload); err != nil {
+	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -52,7 +52,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 	ctx := r.Context()
 
-	plainToken := uuid.New().String() 
+	plainToken := uuid.New().String()
 	hash := sha256.Sum256([]byte(plainToken))
 	hashToken := hex.EncodeToString(hash[:])
 
@@ -68,7 +68,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 			app.internalServerError(w, r, err)
 		}
 	}
- 
+
 	// mail
 
 	if err := app.jsonResponse(w, http.StatusCreated, nil); err != nil {
