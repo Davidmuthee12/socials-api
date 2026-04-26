@@ -141,7 +141,7 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Socials APP API
 paths:
-  /authentication/user:
+  /authentication/users:
     post:
       consumes:
       - application/json

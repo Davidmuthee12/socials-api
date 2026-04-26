@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	ErrDuplicateEmail = errors.New("a user with that email already exists")
+	ErrDuplicateEmail    = errors.New("a user with that email already exists")
 	ErrDuplicateUsername = errors.New("a user with that username already exists")
 )
+
 type User struct {
 	ID        int64    `json:"id"`
 	Username  string   `json:"username"`
@@ -56,19 +57,19 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 		query,
 		user.Username,
 		user.Email,
-		user.Password,
+		user.Password.hash,
 	).Scan(
 		&user.ID,
 		&user.CreatedAt,
 	)
 
 	if err != nil {
-		switch{
+		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
 			return ErrDuplicateEmail
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
 			return ErrDuplicateUsername
-		default: 
+		default:
 			return err
 		}
 	}
@@ -113,21 +114,20 @@ func (s *UserStore) GetByID(ctx context.Context, userID int64) (*User, error) {
 
 func (s *UserStore) CreateAndInvite(ctx context.Context, user *User, token string, invitationExp time.Duration) error {
 	// transaction wrapper
-	return withTx(s.db, ctx, func(tx *sql.Tx) error  {
-	// create the user
-	if err := s.Create(ctx, tx, user); err != nil {
-		return err
-	}
+	return withTx(s.db, ctx, func(tx *sql.Tx) error {
+		// create the user
+		if err := s.Create(ctx, tx, user); err != nil {
+			return err
+		}
 
-	// create the user invite
-	if err := s.CreateUserInvitation(ctx, tx, token, invitationExp, user.ID); err != nil {
-		return err
-	}
+		// create the user invite
+		if err := s.CreateUserInvitation(ctx, tx, token, invitationExp, user.ID); err != nil {
+			return err
+		}
 
-	return nil
+		return nil
 	})
 }
-
 
 func (s *UserStore) CreateUserInvitation(ctx context.Context, tx *sql.Tx, token string, exp time.Duration, userID int64) error {
 	query := `

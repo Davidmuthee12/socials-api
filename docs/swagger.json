@@ -16,7 +16,7 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/authentication/user": {
+        "/authentication/users": {
             "post": {
                 "description": "Register a user",
                 "consumes": [

@@ -42,7 +42,7 @@ func main() {
 		},
 		env: env.GetString("ENV", "development"),
 		mail: mailConfig{
-			exp: time.Hour * 24 *3, // user has 3 days to accept invitation
+			exp: time.Hour * 24 * 3, // user has 3 days to accept invitation
 		},
 	}
 
