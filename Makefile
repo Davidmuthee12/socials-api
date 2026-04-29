@@ -39,7 +39,7 @@ run:
 	$(APP_BIN)
 
 test:
-	go test ./...
+	go test -v ./...
 
 tidy:
 	go mod tidy
