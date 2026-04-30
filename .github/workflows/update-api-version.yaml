@@ -11,48 +11,23 @@ permissions:
 
 jobs:
   update-version:
-    runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      - name: Extract latest version
-        id: changelog
+      - name: Extract latest version from CHANGELOG.md
+        id: get_version
         run: |
-          LATEST=$(grep -m1 -Eo '^##[[:space:]]+v?[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | grep -Eo '[0-9]+\.[0-9]+\.[0-9]')
+          VERSION=$(grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -1)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-          if [ -z "$LATEST" ]; then
-            echo " Failed to extract version"
-            exit 1
-          fi
-
-          echo "version=$LATEST" >> $GITHUB_OUTPUT
-          echo "Found version: $LATEST"
-
-      - name: Update version in main.go
+      - name: Update version in cmd/api/main.go
         run: |
-          NEW="${{ steps.changelog.outputs.version }}"
+          sed -i "s/var version = \".*\"/var version = \"${{ steps.get_version.outputs.VERSION }}\"/" cmd/api/main.go
 
-          echo "Updating to version $NEW"
-
-          # Replace safely
-          sed -i -E "s/const version = \"[0-9]+\.[0-9]+\.[0-9]+\"/const version = \"$NEW\"/" cmd/api/main.go
-
-      - name: Check if file changed
-        id: diff
+      - name: Commit and push if changed
         run: |
-          if git diff --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Commit & push
-        if: steps.diff.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
           git add cmd/api/main.go
-          git commit -m "chore: bump API version to ${{ steps.changelog.outputs.version }}"
+          git commit -m "Update version to ${{ steps.get_version.outputs.VERSION }}" || echo "No changes to commit"
           git push
