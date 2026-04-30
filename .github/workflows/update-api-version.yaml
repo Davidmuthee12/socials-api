@@ -2,8 +2,7 @@ name: Update API Version
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - CHANGELOG.md
 
@@ -12,46 +11,48 @@ permissions:
 
 jobs:
   update-version:
-    name: Sync version constant from CHANGELOG
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Extract latest version from CHANGELOG.md
+      - name: Extract latest version
         id: changelog
         run: |
-          # Grab the first line that matches a semver heading, e.g. "## 1.2.3 (2026-04-30)"
-          LATEST=$(grep -m 1 -oP '(?<=^## )\d+\.\d+\.\d+' CHANGELOG.md)
+          LATEST=$(grep -m1 -Eo '^##[[:space:]]+v?[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | grep -Eo '[0-9]+\.[0-9]+\.[0-9]')
+
           if [ -z "$LATEST" ]; then
-            echo "No semver heading found in CHANGELOG.md – aborting."
+            echo " Failed to extract version"
             exit 1
           fi
-          echo "Found version: $LATEST"
-          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
 
-      - name: Read current version from main.go
-        id: current
-        run: |
-          CURRENT=$(grep -oP '(?<=const version = ")\d+\.\d+\.\d+(?=")' cmd/api/main.go)
-          echo "Current version: $CURRENT"
-          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "version=$LATEST" >> $GITHUB_OUTPUT
+          echo "Found version: $LATEST"
 
       - name: Update version in main.go
-        if: steps.changelog.outputs.version != steps.current.outputs.version
         run: |
           NEW="${{ steps.changelog.outputs.version }}"
-          sed -i "s/const version = \".*\"/const version = \"$NEW\"/" cmd/api/main.go
-          echo "Updated main.go to version $NEW"
 
-      - name: Commit and push if changed
-        if: steps.changelog.outputs.version != steps.current.outputs.version
+          echo "Updating to version $NEW"
+
+          # Replace safely
+          sed -i -E "s/const version = \"[0-9]+\.[0-9]+\.[0-9]+\"/const version = \"$NEW\"/" cmd/api/main.go
+
+      - name: Check if file changed
+        id: diff
         run: |
-          git config user.name  "github-actions[bot]"
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit & push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add cmd/api/main.go
           git commit -m "chore: bump API version to ${{ steps.changelog.outputs.version }}"
           git push
