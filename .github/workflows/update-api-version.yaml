@@ -24,7 +24,7 @@ jobs:
       - name: Extract latest version from CHANGELOG.md
         id: changelog
         run: |
-          VERSION=$(grep -m 1 -oP '(?<=^## )\d+\.\d+\.\d+' CHANGELOG.md)
+          VERSION=$(grep -m 1 -oP '^## \[?\K\d+\.\d+\.\d+' CHANGELOG.md)
 
           if [ -z "$VERSION" ]; then
             echo "Could not extract version from CHANGELOG.md"
