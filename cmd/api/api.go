@@ -11,6 +11,7 @@ import (
 
 	"github.com/Davidmuthee12/socials/docs"
 	"github.com/Davidmuthee12/socials/internal/auth"
+	"github.com/Davidmuthee12/socials/internal/env"
 	"github.com/Davidmuthee12/socials/internal/mailer"
 	ratelimiter "github.com/Davidmuthee12/socials/internal/rateLimiter"
 	"github.com/Davidmuthee12/socials/internal/store"
@@ -93,8 +94,9 @@ func (app *application) mount() http.Handler {
 	r := chi.NewRouter()
 
 	// Basic CORS
+	// Be careful where you place the cors middleware. e.g. place before the RateLimiter.
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins:   []string{env.GetString("CORS_ALLOWED_ORIGIN", "http://localhost:5174")},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
