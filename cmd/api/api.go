@@ -169,7 +169,7 @@ func (app *application) run(mux http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	// Gracefull shutdown
+	// Gracefull shutdown 
 
 	shutdown := make(chan error)
 
