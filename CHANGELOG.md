@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/Davidmuthee12/socials-api/compare/v1.1.0...v1.1.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* fixes update version script ([c5d3a1a](https://github.com/Davidmuthee12/socials-api/commit/c5d3a1a8b76f8444c6c0e4aa99b8fd5e8dd1977f))
+
 ## [1.1.0](https://github.com/Davidmuthee12/socials-api/compare/v1.0.0...v1.1.0) (2026-04-30)
 
 
