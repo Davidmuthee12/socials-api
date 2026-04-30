@@ -7,6 +7,7 @@ import (
 	"github.com/Davidmuthee12/socials/internal/db"
 	"github.com/Davidmuthee12/socials/internal/env"
 	"github.com/Davidmuthee12/socials/internal/mailer"
+	ratelimiter "github.com/Davidmuthee12/socials/internal/rateLimiter"
 	"github.com/Davidmuthee12/socials/internal/store"
 	cache "github.com/Davidmuthee12/socials/internal/store/cache"
 	"github.com/redis/go-redis/v9"
@@ -73,6 +74,11 @@ func main() {
 				iss:    "socials",
 			},
 		},
+		rateLimiter: ratelimiter.Config{
+			RequestPerTimeFrame: env.GetInt("RATELIMITER_REQUEST_COUNT", 20),
+			TimeFrame:           time.Second * 5,
+			Enabled:             env.GetBool("RATE_LIMITER_ENABLED", true),
+		},
 	}
 
 	// Logger
@@ -99,7 +105,14 @@ func main() {
 	if cfg.redisCfg.enabled {
 		rdb = cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
 		logger.Info("Redis cache connection pool established")
+
+		defer rdb.Close()
 	}
+
+	ratelimiter := ratelimiter.NewFixedWindowLimiter(
+		cfg.rateLimiter.RequestPerTimeFrame,
+		cfg.rateLimiter.TimeFrame,
+	)
 
 	store := store.NewStorage(db)
 	cacheStorage := cache.NewRedisStorage(rdb)
@@ -121,6 +134,7 @@ func main() {
 		mailer:       mailer,
 		// mailer: mailtrap,
 		authenticator: jwtAuthenticator,
+		rateLimiter:   ratelimiter,
 	}
 
 	mux := app.mount()
