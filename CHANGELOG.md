@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Davidmuthee12/socials-api/compare/v1.0.0...v1.1.0) (2026-04-30)
+
+
+### Features
+
+* update api version automatically ([4aad226](https://github.com/Davidmuthee12/socials-api/commit/4aad226204a2fad6125cb01e4dbd0604d06a32fc))
+
 ## 1.0.0 (2026-04-30)
 
 
