@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/Davidmuthee12/socials-api/compare/v1.1.4...v1.1.5) (2026-04-30)
+
+
+### Bug Fixes
+
+* sync API version extraction and main version ([edd53f0](https://github.com/Davidmuthee12/socials-api/commit/edd53f0ea3d302eeb95491f811a66de19885fd4a))
+
 ## [1.1.4](https://github.com/Davidmuthee12/socials-api/compare/v1.1.3...v1.1.4) (2026-04-30)
 
 
