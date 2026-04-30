@@ -1,0 +1,57 @@
+name: Update API Version
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - CHANGELOG.md
+
+permissions:
+  contents: write
+
+jobs:
+  update-version:
+    name: Sync version constant from CHANGELOG
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract latest version from CHANGELOG.md
+        id: changelog
+        run: |
+          # Grab the first line that matches a semver heading, e.g. "## 1.2.3 (2026-04-30)"
+          LATEST=$(grep -m 1 -oP '(?<=^## )\d+\.\d+\.\d+' CHANGELOG.md)
+          if [ -z "$LATEST" ]; then
+            echo "No semver heading found in CHANGELOG.md – aborting."
+            exit 1
+          fi
+          echo "Found version: $LATEST"
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: Read current version from main.go
+        id: current
+        run: |
+          CURRENT=$(grep -oP '(?<=const version = ")\d+\.\d+\.\d+(?=")' cmd/api/main.go)
+          echo "Current version: $CURRENT"
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in main.go
+        if: steps.changelog.outputs.version != steps.current.outputs.version
+        run: |
+          NEW="${{ steps.changelog.outputs.version }}"
+          sed -i "s/const version = \".*\"/const version = \"$NEW\"/" cmd/api/main.go
+          echo "Updated main.go to version $NEW"
+
+      - name: Commit and push if changed
+        if: steps.changelog.outputs.version != steps.current.outputs.version
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cmd/api/main.go
+          git commit -m "chore: bump API version to ${{ steps.changelog.outputs.version }}"
+          git push
