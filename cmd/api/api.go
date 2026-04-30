@@ -12,6 +12,7 @@ import (
 	"github.com/Davidmuthee12/socials/docs"
 	"github.com/Davidmuthee12/socials/internal/auth"
 	"github.com/Davidmuthee12/socials/internal/mailer"
+	ratelimiter "github.com/Davidmuthee12/socials/internal/rateLimiter"
 	"github.com/Davidmuthee12/socials/internal/store"
 	cache "github.com/Davidmuthee12/socials/internal/store/cache"
 	"github.com/go-chi/chi/v5"
@@ -28,6 +29,7 @@ type application struct {
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	rateLimiter   ratelimiter.Limiter
 }
 
 type config struct {
@@ -39,6 +41,7 @@ type config struct {
 	frontendURL string
 	auth        authConfig
 	redisCfg    redisConfig
+	rateLimiter ratelimiter.Config
 }
 
 type redisConfig struct {
@@ -104,6 +107,7 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(app.RateLimiterMiddleware)
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -169,17 +173,17 @@ func (app *application) run(mux http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	// Gracefull shutdown 
+	// Gracefull shutdown
 
 	shutdown := make(chan error)
 
-	go func () {
+	go func() {
 		quit := make(chan os.Signal, 1)
 
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		s := <-quit
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		app.logger.Infow("signal caught", "signal", s.String())
@@ -190,7 +194,7 @@ func (app *application) run(mux http.Handler) error {
 	app.logger.Infow("Server has started", "addr", app.config.addr, "env", app.config.env)
 
 	err := srv.ListenAndServe()
-	if !errors.Is(err, http.ErrServerClosed){
+	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 
