@@ -45,5 +45,5 @@ func (s *UserStore) Set(ctx context.Context, user *store.User) error {
 		return err
 	}
 
-	return s.rdb.SetEx(ctx, cacheKey, json, UserExpTime).Err()
+	return s.rdb.Set(ctx, cacheKey, json, UserExpTime).Err()
 }
