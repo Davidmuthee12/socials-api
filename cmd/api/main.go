@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const version = "1.1.3"
+const version = "1.0.0"
 
 //	@title	Socials APP API
 
