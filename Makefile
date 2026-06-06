@@ -1,10 +1,10 @@
 -include .env
+.EXPORT_ALL_VARIABLES:
 
 MIGRATE ?= migrate
 MIGRATIONS_PATH ?= ./cmd/migrate/migrations
 MIGRATIONS_SOURCE ?= file://$(MIGRATIONS_PATH)
 APP_BIN ?= ./bin/main
-export DB_ADDR
 
 .PHONY: help api build run test tidy docker-up docker-down migration-create migration-up migration-down migration-down-all migration-force migration-version migration-goto migration-drop
 
